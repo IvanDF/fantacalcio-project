@@ -28,7 +28,6 @@
 
 	$: pips = controller ? controller.innerElements : [];
 	$: currentPerPage = controller ? controller.perPage : perPage;
-	$: totalDots = controller ? Math.ceil(controller.innerElements.length / currentPerPage) : [];
 
 	onMount(() => {
 		controller = new Siema({

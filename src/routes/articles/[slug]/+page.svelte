@@ -55,8 +55,8 @@
 		<Carousel autoplay={2000}>
 			{#each data as { id, author, creation_date, subtitle, title }, index (index)}
 				<ArticleSliderSlide
-					onClick={(e) => goto('/articles/' + e)}
-					sliderData={{ id, author, creationDate: creation_date, subtitle, title }}
+					onClick={() => goto('/articles/' + id)}
+					sliderData={{ author, creationDate: creation_date, subtitle, title }}
 				/>
 			{/each}
 		</Carousel>
