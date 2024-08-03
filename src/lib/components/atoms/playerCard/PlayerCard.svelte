@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import Button from '../button/button.svelte';
-	import Loader from '../Loader.svelte';
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 	import { marked } from 'marked';
 	import { goto } from '$app/navigation';
+	import { handleNuvBotChatOpening, handlePlayerCardOpening, nuvbotChat } from '$lib/store/store';
+	import type { Message } from '$lib/store/store';
+	import SpeakingLoader from '../SpeakingLoader.svelte';
+	import type { ChatInput } from '$lib/service/nuvBot';
 
 	interface ICardRowProps {
 		label?: string;
@@ -26,12 +28,25 @@
 	let aiOpinionWritingEffect: string | Promise<string>;
 	let isLoading = false;
 
+	let aiMessage: Message;
+	let userMessage: ChatInput;
+
 	const getAiOpinion = async () => {
 		if (!playerData) return;
 
 		isLoading = true;
-		aiOpinion = await getAiOpinionFromBackend(playerData);
-		showMessage();
+		userMessage = {
+			message: ('mi dai un parere su questo calciatore? ' + JSON.stringify(playerData)) as string
+		};
+		aiOpinion = await nuvbotChat(userMessage);
+		handlePlayerCardOpening();
+
+		aiMessage = {
+			text: aiOpinion,
+			type: 'ai'
+		};
+
+		handleNuvBotChatOpening(true);
 		isLoading = false;
 	};
 
@@ -108,7 +123,7 @@
 		{/if}
 
 		{#if isLoading}
-			<Loader />
+			<SpeakingLoader />
 		{/if}
 
 		{#if aiOpinionWritingEffect && !isLoading}

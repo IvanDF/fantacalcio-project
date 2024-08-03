@@ -1,14 +1,15 @@
 <script lang="ts">
-	import Loader from '$lib/components/atoms/Loader.svelte';
-	import { getAiComparison } from '$lib/service/ai/aiComparator';
-	import { getStatsData, getStatsDataById } from '$lib/service/fantamaster/getStats';
-	import { selectedRows } from '$lib/store/store';
-	import { marked } from 'marked';
+	import { getStatsData } from '$lib/service/fantamaster/getStats';
 	import { onMount } from 'svelte';
+	import { nuvbotChat, selectedRows } from '$lib/store/store';
+	import { handleNuvBotChatOpening, handlePlayerCardOpening } from '$lib/store/store';
+	import SpeakingLoader from '$lib/components/atoms/SpeakingLoader.svelte';
+	import type { ChatInput } from '$lib/service/nuvBot';
 
 	const playersToCompare = [];
 	let aiComparsion = '';
 	let loading = false;
+	let message: ChatInput;
 
 	onMount(async () => {
 		loading = true;
@@ -18,20 +19,19 @@
 			playersToCompare.push(row);
 		});
 
-		aiComparsion = await getAiComparison(playersToCompare);
-		aiComparsion = marked.parse(aiComparsion);
+		message = {
+			message: 'Mi fai un confronto tra questi due?' + JSON.stringify(playersToCompare)
+		};
+
+		aiComparsion = await nuvbotChat(message);
+
 		loading = false;
+		handleNuvBotChatOpening(true);
+
+		handlePlayerCardOpening();
 	});
 </script>
 
 {#if loading}
-	<Loader />
-{:else}
-	<div class="flex flex-col gap-5 text-center max-w-xl">
-		<h3>Il verdetto dell'AI</h3>
-
-		<p>
-			{@html aiComparsion}
-		</p>
-	</div>
+	<SpeakingLoader />
 {/if}
